@@ -1,3 +1,5 @@
+version: "3.3"
+
 services:
   jenkins:
     image: jenkins/jenkins:lts
@@ -8,9 +10,10 @@ services:
       - 8082:8080
       - 50000:50000
     extra_hosts:
-      - "swarm-manager: 192.168.0.140" #тут нужно прописать Ip сварм менеджера.
+      - "swarm-manager: 192.168.0.12" #тут нужно прописать Ip сварм менеджера.
     container_name: jenkins
     volumes: jenkins_home:/var/jenkins_home
+
 volumes:
   jenkins_home:
     driver_opts:
