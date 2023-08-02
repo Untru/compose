@@ -18,5 +18,5 @@ volumes:
   registry_data:
     driver_opts:
       type: nfs
-      o: addr=your.server.ip,nolock,soft,rw
+      o: addr=192.168.1.141,nolock,soft,rw
       device: ":/mnt/volumes/registry/registry_data"
