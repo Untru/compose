@@ -7,7 +7,7 @@ services:
     ports:
       - 5000:5000
     volumes:
-      - registry_data:/var/lib/registry
+      - registry_data_test:/var/lib/registry
     deploy:
       mode: replicated
       replicas: 1
@@ -15,7 +15,7 @@ services:
         constraints: [node.role == worker]
 
 volumes:
-  registry_data:
+  registry_data_test:
     driver_opts:
       type: nfs
       o: addr=192.168.1.141,nolock,soft,rw
