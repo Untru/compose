@@ -1,0 +1,19 @@
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    restart: unless-stopped
+    privileged: true
+    user: root
+    ports:
+      - 8082:8080
+      - 50000:50000
+    extra_hosts:
+      - "swarm-manager: 192.168.0.140" #тут нужно прописать Ip сварм менеджера.
+    container_name: jenkins
+    volumes: jenkins_home:/var/jenkins_home
+volumes:
+  jenkins_home:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.141,nolock,soft,rw
+      device: ":/mnt/volumes/jenkins_home"
