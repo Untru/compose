@@ -1,0 +1,84 @@
+version: "3.3"
+
+services:
+  srv:
+    image: 192.168.1.53:5000/server:lts
+    hostname: mainframe
+    restart: always
+    privileged: true
+    devices:
+      - "/dev:/dev"
+    ports:
+      - "1540-1541:1540-1541"
+      - "1560-1591:1560-1591"
+      - "9095:9095"
+    volumes:
+      - srv_data:/home/usr1cv8/.1cv8
+      - srv_log:/var/log/1C
+      - srv_config/logcfg.xml:/opt/1cv8/current/conf/logcfg.xml
+      - srv_lic:/var/1C/licenses
+
+  webserver:
+    image: 192.168.1.53:5000/apache:lts
+    restart: always
+    ports:
+      - 999:80
+      - 3333:3333
+    volumes:
+      - ws_config:/opt/app/winow/config
+      - ws_repo:/opt/app/repo"
+
+  db:
+    image: quickes/pg1c:12.7_1
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - DEBUG=false
+      - PG_TRUST_LOCALNET=true
+      - PG_PASSWORD=46fewpcz
+    volumes:
+      - pg_data:/var/lib/postgresql
+      - pg_run:/run-postgresql
+    command: >
+      -c shared_buffers=512MB
+      -c work_mem=256MB
+      -c maintenance_work_mem=512MB
+      -c temp_buffers=256MB
+      -c effective_cache_size=1GB
+      -c effective_io_concurrency=4
+      -c autovacuum=on
+      -c synchronous_commit=off
+      -c commit_delay=500
+
+volumes:
+  srv_data:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.141,nolock,soft,rw
+      device: ":/mnt/volumes/srv_data"
+  srv_lic:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.141,nolock,soft,rw
+      device: ":/mnt/volumes/srv_lic"
+  srv_config:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.141,nolock,soft,rw
+      device: ":/mnt/volumes/srv_config"
+  srv_log:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.141,nolock,soft,rw
+      device: ":/mnt/volumes/srv_log"
+  pg_data:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.141,nolock,soft,rw
+      device: ":/mnt/volumes/pg_data"
+  pg_run:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.141,nolock,soft,rw
+      device: ":/mnt/volumes/pg_run"
