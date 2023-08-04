@@ -1,0 +1,113 @@
+version: "3.6"
+services:
+  db:
+    image: postgres:14.8-alpine3.18
+    environment:
+      # Environment variables for PostgreSQL, 
+      # we are using Docker secrets for storing sensitive data
+      POSTGRES_DB_FILE: /run/secrets/gitlab_postgres_db
+      POSTGRES_USER_FILE: /run/secrets/gitlab_postgres_usr
+      POSTGRES_PASSWORD_FILE: /run/secrets/gitlab_postgres_pwd
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      # We mount PostgreSQL data volume
+      - postgresql_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    secrets:
+      # Docker secrets for PostgreSQL
+      - gitlab_postgres_pwd
+      - gitlab_postgres_usr
+      - gitlab_postgres_db
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        # We want this service to be deployed on a node with a worker role
+        constraints:
+          - node.role == worker  
+
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    depends_on:
+      # GitLab service depends on db service
+      - db
+    ports:
+      # SSH, HTTP and HTTPS ports
+      - "2289:22"
+      - "8001:80"
+      - "4431:443"
+    volumes:
+      # We mount GitLab data, logs and config volumes
+      - gitlab_data:/var/opt/gitlab
+      - gitlab_logs:/var/log/gitlab
+      - gitlab_config:/etc/gitlab
+    shm_size: '256m'
+    environment:
+        # We use a Docker config for GitLab configuration
+        GITLAB_OMNIBUS_CONFIG: "from_file('/omnibus_config.rb')"
+        configs:
+        # Docker config for GitLab
+        - source: gitlab.rb
+            target: /omnibus_config.rb
+        secrets:
+        # Docker secrets for GitLab
+        - gitlab_root_password
+        - gitlab_postgres_usr
+        - gitlab_postgres_pwd
+        - gitlab_postgres_db
+        deploy:
+        replicas: 1
+        restart_policy:
+            condition: on-failure
+        placement:
+            # We want this service to be deployed on a node with a worker role
+            constraints:
+            - node.role == worker       
+
+    configs:
+    # Docker config for GitLab
+    gitlab.rb:
+        external: true
+
+    secrets:
+    # Docker secrets for GitLab and PostgreSQL
+    gitlab_root_password:
+        external: true
+    gitlab_postgres_usr:
+        external: true
+    gitlab_postgres_pwd:
+        external: true  
+    gitlab_postgres_db:
+        external: true
+
+    networks:
+    gitlab:
+        external: false
+
+volumes:
+    # Docker volumes for PostgreSQL and GitLab
+    postgresql_data:
+        driver: local
+        driver_opts:
+          type: nfs
+          o: addr=192.168.1.141,nolock,soft,rw
+          device: ":/mnt/volumes/gitlab/postgresql_data"
+    gitlab_data:
+        driver: local
+        driver_opts:
+          type: nfs
+          o: addr=192.168.1.141,nolock,soft,rw
+          device: ":/mnt/volumes/gitlab_data"  
+    gitlab_config:
+        driver: local
+        driver_opts:
+        type: nfs
+        o: addr=192.168.1.141nolock,soft,rw
+        device: ":/mnt/volumes/gitlab/gitlab_config"  
+    gitlab_logs:
+        driver: local
+        driver_opts:
+          type: nfs
+          o: addr=192.168.1.141,nolock,soft,rw
+          device: ":/mnt/volumes/gitlab_logs"
