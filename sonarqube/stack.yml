@@ -19,9 +19,9 @@ services:
     depends_on:
       - postgresql
     ulimits:
-     nofile:
-      soft: 65535
-      hard: 65535 
+      nofile:
+        soft: 65535
+        hard: 65535
     networks:
       - sonarnetwork
     environment:
@@ -40,7 +40,27 @@ networks:
     driver: bridge
 volumes:
   sonarqube_conf:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.141,nolock,soft,rw
+      device: ":/mnt/volumes/sonarqube/conf"
   sonarqube_data:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.141,nolock,soft,rw
+      device: ":/mnt/volumes/sonarqube/data"
   sonarqube_extensions:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.141,nolock,soft,rw
+      device: ":/mnt/volumes/sonarqube/extensions"
   postgresql:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.141,nolock,soft,rw
+      device: ":/mnt/volumes/sonarqube/postgresql"
   postgresql_data:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.141,nolock,soft,rw
+      device: ":/mnt/volumes/sonarqube/postgresql_data"
