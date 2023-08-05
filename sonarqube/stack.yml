@@ -3,8 +3,6 @@ services:
   postgresql:
     restart: always
     image: postgres:11
-    networks:
-      - sonarnetwork
     environment:
       - POSTGRES_USER=sonar
       - POSTGRES_PASSWORD=sonar
@@ -35,9 +33,7 @@ services:
       - sonarqube_conf:/opt/sonarqube/conf
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_extensions:/opt/sonarqube/extensions
-networks:
-  sonarnetwork:
-    driver: bridge
+
 volumes:
   sonarqube_conf:
     driver_opts:
