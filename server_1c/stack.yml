@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   srv:
-    image: 192.168.1.53:5000/server:lts
+    image: 192.168.1.140:5000/server:8.3.23.1739
     hostname: mainframe
     restart: always
     privileged: true
@@ -15,11 +15,11 @@ services:
     volumes:
       - srv_data:/home/usr1cv8/.1cv8
       - srv_log:/var/log/1C
-      - srv_config/logcfg.xml:/opt/1cv8/current/conf/logcfg.xml
+      - srv_config:/opt/1cv8/current/conf
       - srv_lic:/var/1C/licenses
 
   webserver:
-    image: 192.168.1.53:5000/apache:lts
+    image: 192.168.1.140:5000/apache:8.3.23.1739
     restart: always
     ports:
       - 999:80
@@ -82,3 +82,13 @@ volumes:
       type: nfs
       o: addr=192.168.1.141,nolock,soft,rw
       device: ":/mnt/volumes/pg_run"
+  ws_config:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.141,nolock,soft,rw
+      device: ":/mnt/volumes/ws_config"
+  ws_repo:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.141,nolock,soft,rw
+      device: ":/mnt/volumes/ws_repo"

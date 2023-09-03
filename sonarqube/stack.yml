@@ -1,4 +1,4 @@
-version: "2"
+version: "3.5"
 services:
   postgresql:
     restart: always
@@ -6,6 +6,14 @@ services:
     environment:
       - POSTGRES_USER=sonar
       - POSTGRES_PASSWORD=sonar
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        # We want this service to be deployed on a node with a worker role
+        constraints:
+          - node.role == worker
     volumes:
       - postgresql:/var/lib/postgresql
       - postgresql_data:/var/lib/postgresql/data
@@ -20,8 +28,14 @@ services:
       nofile:
         soft: 65535
         hard: 65535
-    networks:
-      - sonarnetwork
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        # We want this service to be deployed on a node with a worker role
+        constraints:
+          - node.role == worker
     environment:
       - SONAR_WEB_JAVAOPTS=-server -Xms1g -Xmx2g -XX:+HeapDumpOnOutOfMemoryError
       - SONAR_CE_JAVAOPTS=-Xms4g -Xmx4g -XX:+HeapDumpOnOutOfMemoryError
